@@ -1,0 +1,30 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - echo "===== Cycle Automation File Manager POC ====="
+      - echo "Starting Daily package file operations..."
+
+      - echo "Creating package directories..."
+      - rm -rf package
+      - mkdir -p package/daily
+
+      - echo "Copying Daily package files using shell commands..."
+
+      - find caparent/cadaily/target -type f -exec cp {} package/daily/ \;
+
+      - echo "===== Files copied to package/daily ====="
+      - find package/daily -type f -print
+
+      - echo "Creating ZIP package..."
+      - cd package
+      - zip -r ../cycle-automation-daily-poc.zip daily
+      - cd ..
+
+      - echo "===== Generated ZIP ====="
+      - ls -lh cycle-automation-daily-poc.zip
+
+artifacts:
+  files:
+    - cycle-automation-daily-poc.zip
