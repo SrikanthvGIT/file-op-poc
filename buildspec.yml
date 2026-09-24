@@ -1,25 +1,40 @@
 version: 0.2
 
 phases:
-  install:
-    runtime-versions:
-      java: corretto11
-
   pre_build:
     commands:
-      - 'echo "==> Checking Java..."'
-      - 'java -version'
-      - 'echo "==> Checking Maven..."'
-      - 'mvn -version'
+      - echo "=== POC START ==="
+      - echo "Current directory:"
+      - pwd
+      - echo "Repository contents:"
+      - ls -la
+      - echo "Searching for target directories:"
+      - find . -maxdepth 5 -type d | head -100
 
   build:
     commands:
-      - 'echo "==> Starting Maven build..."'
-      - 'mvn -DskipTests clean install'
-      - 'echo "==> Maven build completed"'
-      - 'echo "==> Checking target directories..."'
-      - 'find . -type d -name target -print'
+      - echo "=== Creating package directory ==="
+      - mkdir -p package/daily
+
+      - echo "=== Copying files ==="
+      - cp -r caparent/cadaily/target/* package/daily/
+
+      - echo "=== Package contents ==="
+      - ls -la package/daily
+
+      - echo "=== Creating ZIP ==="
+      - cd package
+      - zip -r ../garwin-ca-poc.zip daily
+      - cd ..
+
+      - echo "=== ZIP verification ==="
+      - ls -lh garwin-ca-poc.zip
+      - unzip -l garwin-ca-poc.zip
+
+  post_build:
+    commands:
+      - echo "=== POC COMPLETED ==="
 
 artifacts:
   files:
-    - '**/*'
+    - garwin-ca-poc.zip
