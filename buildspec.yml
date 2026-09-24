@@ -1,30 +1,30 @@
 version: 0.2
 
 phases:
-  build:
+  pre_build:
     commands:
-      - echo "===== Cycle Automation File Manager POC ====="
-      - echo "Starting Daily package file operations..."
-
-      - echo "Creating package directories..."
+      - echo "Starting Cycle Automation File Manager POC"
+      - echo "Cleaning previous package directory"
       - rm -rf package
       - mkdir -p package/daily
 
-      - echo "Copying Daily package files using shell commands..."
+  build:
+    commands:
+      - echo "Copying Daily package files"
+      - find caparent/cadaily/target -type f -exec cp -f {} package/daily/ \;
+      - echo "Daily package contents:"
+      - ls -la package/daily
 
-      - find caparent/cadaily/target -type f -exec cp {} package/daily/ \;
-
-      - echo "===== Files copied to package/daily ====="
-      - find package/daily -type f -print
-
-      - echo "Creating ZIP package..."
+      - echo "Creating ZIP package"
       - cd package
-      - zip -r ../cycle-automation-daily-poc.zip daily
-      - cd ..
+      - zip -r ../garwin-ca-poc.zip daily
 
-      - echo "===== Generated ZIP ====="
-      - ls -lh cycle-automation-daily-poc.zip
+  post_build:
+    commands:
+      - echo "POC completed successfully"
+      - echo "Generated artifact:"
+      - ls -lh garwin-ca-poc.zip
 
 artifacts:
   files:
-    - cycle-automation-daily-poc.zip
+    - garwin-ca-poc.zip
