@@ -7,12 +7,19 @@ phases:
 
   pre_build:
     commands:
-      - 'echo "Testing Java and Maven"'
+      - 'echo "==> Checking Java..."'
       - 'java -version'
-      - 'which java'
-      - 'which mvn'
+      - 'echo "==> Checking Maven..."'
       - 'mvn -version'
 
   build:
     commands:
-      - 'echo "Environment test successful"'
+      - 'echo "==> Starting Maven build..."'
+      - 'mvn -DskipTests clean install'
+      - 'echo "==> Maven build completed"'
+      - 'echo "==> Checking target directories..."'
+      - 'find . -type d -name target -print'
+
+artifacts:
+  files:
+    - '**/*'
