@@ -6,36 +6,33 @@ phases:
       - echo "=== POC 1 START ==="
       - echo "Current directory:"
       - pwd
-      - echo "Checking Java/Maven environment..."
-      - java -version
-      - mvn -version
+      - echo "Repository structure:"
+      - find . -maxdepth 5 -type f -print
 
   build:
     commands:
-      - echo "=== 1. Building the project with Maven ==="
-      - mvn -DskipTests -f ${POMFILE_FOLDER:-pom.xml} clean install
-
-      - echo "=== 2. Creating package directories ==="
+      - echo "=== 1. Creating package directory ==="
       - mkdir -p package/daily
 
-      - echo "=== 3. Copying DAILY target files ==="
+      - echo "=== 2. Copying DAILY target files ==="
       - find caparent/cadaily/target -type f -exec cp -f {} package/daily/ \;
 
-      - echo "=== 4. Daily package contents ==="
-      - find package/daily -type f -maxdepth 1 -print
+      - echo "=== 3. Daily package contents ==="
       - ls -la package/daily
 
-      - echo "=== 5. Creating ZIP package ==="
+      - echo "=== 4. Creating ZIP package ==="
       - EXPORT_NAME="${buildName:-Garwin-CA}-${BUILD_NUMBER:-1}.zip"
       - zip -r "${EXPORT_NAME}" package
 
-      - echo "=== 6. Verifying ZIP package ==="
+      - echo "=== 5. Verifying ZIP package ==="
       - ls -lh "${EXPORT_NAME}"
       - unzip -l "${EXPORT_NAME}"
 
   post_build:
     commands:
-      - echo "=== POC 1 COMPLETED ==="
+      - echo "=== POC 1 COMPLETED SUCCESSFULLY ==="
+      - echo "Generated artifact:"
+      - ls -lh *.zip
 
 artifacts:
   files:
