@@ -1,43 +1,18 @@
 version: 0.2
 
-env:
-  variables:
-    JAVA_HOME: "/usr/lib/jvm/java-11-amazon-corretto"
-
 phases:
+  install:
+    runtime-versions:
+      java: corretto11
+
   pre_build:
     commands:
-      - 'echo "==> [PRE-BUILD] Initializing workspace..."'
+      - 'echo "Testing Java and Maven"'
       - 'java -version'
+      - 'which java'
+      - 'which mvn'
       - 'mvn -version'
-      - 'echo "Target repository: ${REPOSITORY:-default-repo}"'
-      - 'echo "Build name: ${buildName:-garwin-ca}"'
-      - 'echo "Build environment: ${buildEnvironment:-dev}"'
 
   build:
     commands:
-      - 'echo "==> [BUILD] Compiling Maven project..."'
-      - 'mvn -DskipTests -f ${POMFILE_FOLDER}pom.xml clean install'
-      - 'echo "==> [BUILD] Performing native file operations - replacing File Manager Plugin"'
-      - 'mkdir -p package/daily'
-      - 'echo "==> [BUILD] Copying daily target files..."'
-      - 'cp -r caparent/cadaily/target/* package/daily/'
-      - 'echo "==> [BUILD] Daily package contents:"'
-      - 'ls -la package/daily'
-      - 'echo "==> [BUILD] Creating deployment ZIP..."'
-      - 'cd package'
-      - 'zip -r "../${buildName}-${BUILD_NUMBER:-1}.zip" .'
-      - 'cd ..'
-
-  post_build:
-    commands:
-      - 'echo "==> [POST-BUILD] Execution finished."'
-      - 'echo "==> Generated ZIP:"'
-      - 'ls -lh "${buildName}-${BUILD_NUMBER:-1}.zip"'
-      - 'echo "==> Package contents:"'
-      - 'ls -la package/daily'
-
-artifacts:
-  files:
-    - '${buildName}-${BUILD_NUMBER:-1}.zip'
-  name: Garwin-Daily-Artifacts
+      - 'echo "Environment test successful"'
