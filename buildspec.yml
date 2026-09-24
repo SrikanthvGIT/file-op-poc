@@ -18,6 +18,7 @@ phases:
       - echo "Creating ZIP package"
       - cd package
       - zip -r ../garwin-ca-poc.zip daily
+      - cd ..
 
   post_build:
     commands:
