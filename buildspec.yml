@@ -1,31 +1,59 @@
 version: 0.2
 
+env:
+  variables:
+    JAVA_HOME: "/usr/lib/jvm/java-11-amazon-corretto"
+  # Set via CodeBuild Environment overrides or environment variables:
+  # REPOSITORY, BRANCH, POMFILE_FOLDER, buildName, buildEnvironment, dailyTargetFolders
+
 phases:
   pre_build:
     commands:
-      - echo "Starting Cycle Automation File Manager POC"
-      - echo "Cleaning previous package directory"
-      - rm -rf package
-      - mkdir -p package/daily
+      - echo "==> [PRE-BUILD] Initializing workspace and checking environment..."
+      - java -version
+      - mvn -version
+      - echo "Target repository: ${REPOSITORY:-default-repo}"
+      - echo "Build name: ${buildName:-garwin-ca}"
+      - echo "Build environment: ${buildEnvironment:-dev}"
 
   build:
     commands:
-      - echo "Copying Daily package files"
-      - find caparent/cadaily/target -type f -exec cp -f {} package/daily/ \;
-      - echo "Daily package contents:"
-      - ls -la package/daily
+      - echo "==> [BUILD] Compiling Maven project..."
+      - mvn -DskipTests -f ${POMFILE_FOLDER}pom.xml clean install
 
-      - echo "Creating ZIP package"
+      - echo "==> [BUILD] Performing native file operations (Replacing File Manager Plugin)..."
+      - mkdir -p package/daily
+
+      - echo "==> [BUILD] Copying daily target folders..."
+      - |
+        if [ -n "$dailyTargetFolders" ]; then
+          echo "$dailyTargetFolders" | while IFS= read -r pattern; do
+            if [ -n "$pattern" ]; then
+              echo "Processing daily pattern: $pattern"
+              # Find matching files/folders and copy them recursively to package/daily
+              find . -path "*${pattern}*" -not -path "./package/*" -exec cp -r --parents {} package/daily/ \; 2>/dev/null || true
+            fi
+          done
+        else
+          echo "Warning: dailyTargetFolders parameter is empty. Copying default target outputs."
+          cp -r caparent/cadaily/target/* package/daily/ 2>/dev/null || true
+        fi
+
+      - echo "==> [BUILD] Creating deployment zip package..."
       - cd package
-      - zip -r ../garwin-ca-poc.zip daily
+      - zip -r "../${buildName}-${BUILD_NUMBER:-1}.zip" .
       - cd ..
 
   post_build:
     commands:
-      - echo "POC completed successfully"
-      - echo "Generated artifact:"
-      - ls -lh garwin-ca-poc.zip
+      - echo "==> [POST-BUILD] Execution finished."
+      - ls -al
+      - echo "Package verification:"
+      - ls -al package/daily/
 
 artifacts:
   files:
-    - garwin-ca-poc.zip
+    - "${buildName}-${BUILD_NUMBER:-1}.zip"
+    - "caparent/cadaily/target/**/*"
+  name: Garwin-Daily-Artifacts
+
